@@ -1,66 +1,99 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+
+import React, { useState, useRef, useEffect } from 'react';
+import { useChat } from './hooks/useChat';
+import { MessageBubble } from './components/MessageBubble';
+import styles from './page.module.css';
 
 export default function Home() {
+  const { messages, isLoading, sendMessage } = useChat();
+  const [inputValue, setInputValue] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputValue.trim() || isLoading) return;
+
+    sendMessage(inputValue);
+    setInputValue('');
+  };
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className={styles.main}>
+      <header className={styles.header}>
+        <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Local Gemma Chat</div>
+        <div style={{ fontSize: '0.8rem', color: '#888' }}>Running on Ollama</div>
+      </header>
+
+      <div className={styles.chatContainer}>
+        {messages.length === 0 && (
+          <div style={{
+            textAlign: 'center',
+            marginTop: '20vh',
+            color: '#666',
+            padding: '0 2rem'
+          }}>
+            <h1>Hello, I'm Gemma.</h1>
+            <p>I'm running locally on your machine. Ask me anything!</p>
+          </div>
+        )}
+
+        {messages.map((msg, index) => (
+          <MessageBubble key={index} role={msg.role} content={msg.content} />
+        ))}
+
+        {isLoading && messages[messages.length - 1]?.role === 'user' && ( // Show loading indicator if AI hasn't responded yet
+          <div className={styles.loadingWrapper} style={{ padding: '1rem' }}>
+            <span style={{ color: '#666' }}>Thinking...</span>
+          </div>
+        )}
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className={styles.inputArea}>
+        <form onSubmit={handleSubmit} className={styles.inputWrapper}>
+          <input
+            type="text"
+            className={styles.input}
+            placeholder="Type your message..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            disabled={isLoading}
+            autoFocus
+          />
+          <button
+            type="submit"
+            className={styles.sendButton}
+            disabled={!inputValue.trim() || isLoading}
+            aria-label="Send message"
           >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </form>
+      </div>
+    </main>
   );
 }
