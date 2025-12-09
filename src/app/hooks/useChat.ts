@@ -1,14 +1,50 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 export interface Message {
     role: 'user' | 'assistant';
     content: string;
 }
 
-export function useChat() {
-    const [messages, setMessages] = useState<Message[]>([]);
+interface UseChatOptions {
+    initialMessages?: Message[];
+    onMessagesChange?: (messages: Message[]) => void;
+}
+
+export function useChat(options: UseChatOptions = {}) {
+    const { initialMessages, onMessagesChange } = options;
+    const [messages, setMessages] = useState<Message[]>(initialMessages ?? []);
     const [isLoading, setIsLoading] = useState(false);
     const abortControllerRef = useRef<AbortController | null>(null);
+    const onMessagesChangeRef = useRef(onMessagesChange);
+    const prevInitialMessagesRef = useRef(initialMessages);
+
+    // Keep the callback ref updated
+    useEffect(() => {
+        onMessagesChangeRef.current = onMessagesChange;
+    }, [onMessagesChange]);
+
+    // Update messages only when initialMessages actually changes (by reference)
+    // This handles loading a different session
+    useEffect(() => {
+        if (initialMessages !== prevInitialMessagesRef.current) {
+            prevInitialMessagesRef.current = initialMessages;
+            setMessages(initialMessages ?? []);
+        }
+    }, [initialMessages]);
+
+    // Notify parent when messages change
+    // Use a ref to avoid calling onMessagesChange on every render
+    const messagesRef = useRef(messages);
+    useEffect(() => {
+        messagesRef.current = messages;
+    });
+
+    useEffect(() => {
+        if (messages.length > 0 && messages !== initialMessages) {
+            onMessagesChangeRef.current?.(messages);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [messages]);
 
     const sendMessage = useCallback(async (content: string) => {
         if (!content.trim()) return;
@@ -67,14 +103,11 @@ export function useChat() {
                             setMessages((prev) => {
                                 const newMessages = [...prev];
                                 const lastMsg = newMessages[newMessages.length - 1];
-                                if (lastMsg.role === 'assistant') {
+                                if (lastMsg && lastMsg.role === 'assistant') {
                                     lastMsg.content = assistantMessage;
                                 }
                                 return newMessages;
                             });
-                        }
-                        if (json.done) {
-                            // Stream finished
                         }
                     } catch (e) {
                         console.error("Error parsing chunk", e);
@@ -82,10 +115,16 @@ export function useChat() {
                 }
             }
 
-        } catch (error: any) {
-            if (error.name !== 'AbortError') {
+        } catch (error: unknown) {
+            if (error instanceof Error && error.name !== 'AbortError') {
                 console.error('Chat error:', error);
-                setMessages((prev) => [...prev, { role: 'assistant', content: 'Sorry, something went wrong.' }]);
+                setMessages((prev) => {
+                    // Only add error message if we still have messages (not cleared)
+                    if (prev.length > 0) {
+                        return [...prev, { role: 'assistant', content: 'Sorry, something went wrong.' }];
+                    }
+                    return prev;
+                });
             }
         } finally {
             setIsLoading(false);
@@ -93,9 +132,29 @@ export function useChat() {
         }
     }, [messages]);
 
+    const cancelGeneration = useCallback(() => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+            setIsLoading(false);
+        }
+    }, []);
+
+    const clearMessages = useCallback(() => {
+        // Abort any ongoing generation before clearing
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+            setIsLoading(false);
+        }
+        setMessages([]);
+    }, []);
+
     return {
         messages,
         isLoading,
         sendMessage,
+        cancelGeneration,
+        clearMessages,
     };
 }

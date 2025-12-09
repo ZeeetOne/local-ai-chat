@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 
-export const runtime = 'nodejs'; // Use nodejs runtime for full stream support if needed, though edge often works too.
+export const runtime = 'nodejs';
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
         const { messages } = body;
 
-        // Default to gemma2:2b if not specified
         const model = 'gemma2:2b';
 
         const response = await fetch('http://127.0.0.1:11434/api/chat', {

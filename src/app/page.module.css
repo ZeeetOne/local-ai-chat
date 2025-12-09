@@ -1,9 +1,15 @@
+.layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
 .main {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  max-width: var(--max-width);
-  margin: 0 auto;
+  flex: 1;
+  min-width: 0;
   position: relative;
 }
 
@@ -11,13 +17,30 @@
   height: var(--header-height);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 1rem;
   padding: 0 1rem;
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(10px);
   position: sticky;
   top: 0;
   z-index: 10;
+}
+
+.menuButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--foreground);
+  transition: background-color 0.2s;
+}
+
+.menuButton:hover {
+  background-color: var(--surface);
 }
 
 .chatContainer {
@@ -93,4 +116,27 @@
 .sendButton:disabled {
   background: #444;
   cursor: not-allowed;
+}
+
+.cancelButton {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.2s;
+}
+
+.cancelButton:hover {
+  transform: translateY(-50%) scale(1.05);
+  background: #dc2626;
 }

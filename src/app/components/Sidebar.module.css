@@ -1,0 +1,139 @@
+.sidebar {
+    width: 260px;
+    background-color: #f9f9f9;
+    border-right: 1px solid #eaeaea;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.header {
+    padding: 1rem;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.newChatButton {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.newChatButton:hover {
+    background-color: #f0f0f0;
+    border-color: #ccc;
+}
+
+.sessionList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sessionItem {
+    padding: 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-align: left;
+    border: none;
+    background: none;
+    width: 100%;
+    position: relative;
+}
+
+.sessionItem:hover {
+    background-color: #eaeaea;
+}
+
+.sessionItem.active {
+    background-color: #e0e0e0;
+}
+
+.sessionTitle {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #fff;
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.sessionPreview {
+    font-size: 0.75rem;
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.deleteButton {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    color: #999;
+}
+
+.sessionItem:hover .deleteButton {
+    opacity: 1;
+}
+
+.deleteButton:hover {
+    color: #ff4444;
+}
+
+@media (prefers-color-scheme: dark) {
+    .sidebar {
+        background-color: #171717;
+        border-right-color: #333;
+    }
+
+    .newChatButton {
+        background-color: #262626;
+        border-color: #404040;
+        color: #ededed;
+    }
+
+    .newChatButton:hover {
+        background-color: #333;
+    }
+
+    .sessionItem:hover {
+        background-color: #262626;
+    }
+
+    .sessionItem.active {
+        background-color: #333;
+    }
+
+    .sessionPreview {
+        color: #888;
+    }
+
+    .header {
+        border-bottom-color: #333;
+    }
+}
