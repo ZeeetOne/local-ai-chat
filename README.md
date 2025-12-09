@@ -6,6 +6,8 @@ This is a simple Next.js chat application that interfaces with a local LLM runni
 
 - **Local Inference**: Runs entirely on your machine. No data leaves your network.
 - **Streaming Responses**: Real-time token streaming for a chat-like experience.
+- **Chat History**: Persistent chat sessions saved to localStorage with sidebar navigation.
+- **Multiple Conversations**: Create, switch between, and manage different chat sessions.
 - **Minimal UI**: Clean, distraction-free interface.
 
 ## Prerequisites
